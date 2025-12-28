@@ -18,11 +18,18 @@ function promisifyChromeStorageGet(area, keys) {
 }
 
 function promisifyChromeStorageSet(area, items) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     try {
-      area.set(items, () => resolve());
-    } catch {
-      resolve();
+      area.set(items, () => {
+        if (chrome.runtime.lastError) {
+          console.error('storage.set failed', chrome.runtime.lastError);
+          return reject(chrome.runtime.lastError);
+        }
+        resolve();
+      });
+    } catch (e) {
+      console.error('storage.set threw', e);
+      reject(e);
     }
   });
 }
@@ -42,10 +49,15 @@ async function hydrateCaches() {
 
 async function persistCaches() {
   const area = getCacheArea();
-  await promisifyChromeStorageSet(area, {
-    [TAB_CACHE_KEY]: tabChatCache,
-    [RECENT_EXPORTS_KEY]: recentExports
-  });
+  try {
+    await promisifyChromeStorageSet(area, {
+      [TAB_CACHE_KEY]: tabChatCache,
+      [RECENT_EXPORTS_KEY]: recentExports
+    });
+  } catch (e) {
+    console.error('Failed to persist caches:', e);
+    throw e;
+  }
 }
 
 function sanitizeFilename(title) {
@@ -140,37 +152,55 @@ async function exportFromCache(tabId, reason = 'tab_close') {
 // Hydrate once per worker start.
 hydrateCaches();
 
-chrome.runtime.onMessage.addListener((message, sender) => {
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   const tabId = sender?.tab?.id;
+  const areaLabel = (getCacheArea() === chrome.storage.session) ? 'session' : 'local';
 
   if (message?.action === 'cache_chat') {
-    // Cache drafts frequently so tab-close export can succeed even if pagehide fails.
     cacheChatForTab(tabId, {
       payload: message.payload,
       title: message.title,
       url: sender?.tab?.url || message.url
+    }).then(() => {
+      sendResponse && sendResponse({ ok: true });
+    }).catch((err) => {
+      console.error('cache_chat failed:', err);
+      sendResponse && sendResponse({ ok: false, error: String(err) });
     });
-    return;
+    return true; // Will respond asynchronously
   }
 
   if (message?.action === 'export_chat') {
-    if (!message.payload) return;
-    if (tabId && wasRecentlyExported(tabId)) {
-      console.log('Gemini Auto Exporter: Skipping duplicate export (recently exported).');
-      return;
-    }
+    (async () => {
+      try {
+        if (!message.payload) {
+          sendResponse && sendResponse({ ok: false, error: 'no payload' });
+          return;
+        }
+        if (tabId && wasRecentlyExported(tabId)) {
+          console.log('Gemini Auto Exporter: Skipping duplicate export (recently exported).');
+          sendResponse && sendResponse({ ok: true, skipped: true });
+          return;
+        }
 
-    const bucket = sanitizeBucket(message.bucketId);
-    const folder = bucket ? `Gemini_Exports/${bucket}` : 'Gemini_Exports';
-    downloadMarkdown(
-      message.payload,
-      message.title,
-      folder,
-      sender?.tab?.url || message.url || ''
-    );
-    if (tabId) {
-      markExported(tabId);
-    }
+        const bucket = sanitizeBucket(message.bucketId);
+        const folder = bucket ? `Gemini_Exports/${bucket}` : 'Gemini_Exports';
+        downloadMarkdown(
+          message.payload,
+          message.title,
+          folder,
+          sender?.tab?.url || message.url || ''
+        );
+        if (tabId) {
+          await markExported(tabId);
+        }
+        sendResponse && sendResponse({ ok: true });
+      } catch (err) {
+        console.error('Export failed in background:', err);
+        sendResponse && sendResponse({ ok: false, error: String(err) });
+      }
+    })();
+    return true; // Will respond asynchronously
   }
 });
 

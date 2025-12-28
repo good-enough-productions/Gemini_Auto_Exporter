@@ -38,10 +38,11 @@ function handleInvalidatedContext(source) {
 function safeSendMessage(message, onOk, onErr) {
   if (extensionInvalidated) return;
   try {
-    chrome.runtime.sendMessage(message, () => {
+    chrome.runtime.sendMessage(message, (response) => {
       const lastErr = chrome.runtime?.lastError;
       if (lastErr) {
         const lastErrMsg = String(lastErr.message || '');
+        console.error('Gemini Auto Exporter: sendMessage lastError', lastErrMsg, lastErr);
         if (lastErrMsg.toLowerCase().includes('context invalidated')) {
           handleInvalidatedContext('sendMessage');
           return;
@@ -49,7 +50,16 @@ function safeSendMessage(message, onOk, onErr) {
         onErr?.(lastErr);
         return;
       }
-      onOk?.();
+
+      // Background can provide structured responses like { ok: false, error: '...' }
+      if (response && response.ok === false) {
+        const err = new Error(response.error || 'background error');
+        console.error('Gemini Auto Exporter: background responded with error', response);
+        onErr?.(err);
+        return;
+      }
+
+      onOk?.(response);
     });
   } catch (e) {
     if (isContextInvalidatedError(e)) {
@@ -186,6 +196,35 @@ function getConversationIdFromUrl(url) {
   }
 }
 
+function getConversationTitle() {
+  // Try several selectors that may contain the visible conversation title
+  const selectors = [
+    'span.conversation-title.gds-title-m',
+    '.conversation-title',
+    '.gds-title-m',
+    'h1',
+    'header h1',
+    'div[role="heading"]'
+  ];
+
+  for (const sel of selectors) {
+    try {
+      const el = document.querySelector(sel);
+      if (el && el.innerText && el.innerText.trim().length > 0) {
+        return el.innerText.trim();
+      }
+    } catch {}
+  }
+
+  // Fallback: try to infer from conversation first user message
+  try {
+    const firstUser = document.querySelector('.user-query, user-query');
+    if (firstUser && firstUser.innerText) return firstUser.innerText.trim().slice(0, 120);
+  } catch {}
+
+  return '';
+}
+
 function getChatContent() {
   const messages = [];
   
@@ -268,7 +307,7 @@ function getChatContent() {
 function formatMarkdown(messages) {
   if (messages.length === 0) return null;
 
-  const title = document.title || 'Gemini Chat';
+  const convTitle = getConversationTitle() || document.title || 'Gemini Chat';
   const date = new Date().toLocaleString();
 
   const meta = {
@@ -280,14 +319,14 @@ function formatMarkdown(messages) {
   
   // YAML-ish frontmatter (helpful for later ingestion)
   let md = `---\n`;
-  md += `title: "${String(title).replace(/"/g, '\\"')}"\n`;
+  md += `title: "${String(convTitle).replace(/"/g, '\\"')}"\n`;
   md += `dateLocal: "${String(date).replace(/"/g, '\\"')}"\n`;
   md += `lastUpdated: "${meta.lastUpdated}"\n`;
   md += `messageCount: ${meta.messageCount}\n`;
   md += `sourceUrl: "${String(meta.sourceUrl).replace(/"/g, '\\"')}"\n`;
   if (meta.conversationId) md += `conversationId: "${String(meta.conversationId).replace(/"/g, '\\"')}"\n`;
   md += `---\n\n`;
-  md += `# ${title}\n\nDate: ${date}\n\n---\n\n`;
+  md += `# ${convTitle}\n\nDate: ${date}\n\n---\n\n`;
 
   messages.forEach(msg => {
     md += `## ${msg.role}\n\n${msg.content}\n\n`;
@@ -300,19 +339,19 @@ function exportNow(bucketId = 'general') {
   const messages = getChatContent();
   console.log(`Gemini Auto Exporter: Export clicked (bucket=${bucketId}). Messages:`, messages.length);
   const markdown = formatMarkdown(messages);
+  const convTitle = getConversationTitle() || document.title || 'gemini_chat';
 
   if (!markdown) {
     setStatus('error', 'no chat found');
     return;
   }
-
   const contentHash = fnv1aHash(markdown);
   setStatus('exporting', bucketId);
   safeSendMessage(
     {
       action: 'export_chat',
       payload: markdown,
-      title: document.title || 'gemini_chat',
+      title: convTitle,
       url: window.location.href,
       conversationId: getConversationIdFromUrl(window.location.href),
       bucketId,
@@ -337,7 +376,7 @@ window.addEventListener('pagehide', () => {
       {
         action: 'export_chat',
         payload: markdown,
-        title: document.title || 'gemini_chat',
+        title: getConversationTitle() || document.title || 'gemini_chat',
         url: window.location.href,
         conversationId: getConversationIdFromUrl(window.location.href),
         bucketId: 'general'
@@ -418,7 +457,11 @@ autosaveIntervalId = setInterval(() => {
         conversationId: getConversationIdFromUrl(window.location.href)
       },
       () => setStatus('saved', `saved ${formatTime()}`),
-      () => setStatus('error', 'cache failed')
+      (err) => {
+        console.error('Gemini Auto Exporter: cache failed callback', err);
+        const msg = err && err.message ? err.message : 'cache failed';
+        setStatus('error', msg);
+      }
     );
   }
 }, 5000);
