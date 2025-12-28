@@ -1,5 +1,8 @@
 # Gemini Auto Exporter
 
+[![GitHub repo](https://img.shields.io/badge/repo-GitHub-blue?logo=github)](https://github.com/good-enough-productions/Gemini_Auto_Exporter)
+[![CI](https://github.com/good-enough-productions/Gemini_Auto_Exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/good-enough-productions/Gemini_Auto_Exporter/actions)
+
 ## Goal
 Reduce friction turning Gemini conversations into action by exporting chats to Markdown with:
 1) a reliable autosave cache, and
