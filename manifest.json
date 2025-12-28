@@ -5,7 +5,8 @@
   "description": "Automatically exports Gemini chats to Markdown when the tab is closed.",
   "permissions": [
     "downloads",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "host_permissions": [
     "https://gemini.google.com/*"
