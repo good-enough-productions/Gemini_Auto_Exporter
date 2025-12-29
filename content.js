@@ -542,10 +542,12 @@ async function saveAnnotations() {
 }
 
 function addAnnotation(messageIndex, snippet, comment, format) {
+  // Generate a unique ID using timestamp + random component
+  const id = `${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
   annotations.push({
-    id: Date.now() + Math.random(),
+    id,
     messageIndex,
-    snippet: snippet.substring(0, 100), // Store first 100 chars for matching
+    snippet: snippet.trim(), // Store the full snippet for accurate matching
     comment,
     format, // 'bold', 'italic', 'code', 'quote', 'highlight'
     createdAt: new Date().toISOString()
