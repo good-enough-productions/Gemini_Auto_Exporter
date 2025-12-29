@@ -107,42 +107,96 @@ function ensureExportPanel() {
   panel.style.right = '20px';
   panel.style.zIndex = '9999';
   panel.style.display = 'flex';
-  panel.style.gap = '8px';
-  panel.style.padding = '8px';
+  panel.style.flexDirection = 'column';
+  panel.style.gap = '10px';
+  panel.style.padding = '12px';
   panel.style.borderRadius = '16px';
   panel.style.background = 'rgba(255,255,255,0.92)';
   panel.style.boxShadow = '0 2px 10px rgba(0,0,0,0.25)';
   panel.style.border = '1px solid rgba(0,0,0,0.08)';
   panel.style.backdropFilter = 'blur(6px)';
+  panel.style.minWidth = '180px';
 
-  const buttons = [
-    { id: 'general', label: 'Export', color: '#1a73e8' },
+  // Tag selection area
+  const tagContainer = document.createElement('div');
+  tagContainer.style.display = 'flex';
+  tagContainer.style.flexWrap = 'wrap';
+  tagContainer.style.gap = '6px';
+  tagContainer.style.marginBottom = '4px';
+
+  const tags = [
     { id: 'notes', label: 'Notes', color: '#0f9d58' },
     { id: 'ideas', label: 'Ideas', color: '#f29900' },
     { id: 'code', label: 'Code', color: '#7e57c2' },
     { id: 'tasks', label: 'Tasks', color: '#d93025' }
   ];
 
-  buttons.forEach(({ id, label, color }) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.dataset.bucketId = id;
-    btn.innerText = label;
-    btn.style.padding = '10px 14px';
-    btn.style.borderRadius = '999px';
-    btn.style.border = 'none';
-    btn.style.cursor = 'pointer';
-    btn.style.fontWeight = '700';
-    btn.style.fontSize = '13px';
-    btn.style.color = 'white';
-    btn.style.background = color;
-    btn.style.boxShadow = '0 1px 4px rgba(0,0,0,0.25)';
-    btn.onmouseenter = () => (btn.style.filter = 'brightness(0.96)');
-    btn.onmouseleave = () => (btn.style.filter = 'none');
-    btn.onclick = () => exportNow(id);
-    panel.appendChild(btn);
+  tags.forEach(({ id, label, color }) => {
+    const tag = document.createElement('button');
+    tag.type = 'button';
+    tag.dataset.tagId = id;
+    tag.innerText = label;
+    tag.style.padding = '6px 12px';
+    tag.style.borderRadius = '999px';
+    tag.style.border = '2px solid ' + color;
+    tag.style.cursor = 'pointer';
+    tag.style.fontWeight = '600';
+    tag.style.fontSize = '12px';
+    tag.style.color = color;
+    tag.style.background = 'white';
+    tag.style.transition = 'all 0.2s ease';
+    tag.dataset.selected = 'false';
+    
+    tag.onclick = () => {
+      const isSelected = tag.dataset.selected === 'true';
+      tag.dataset.selected = isSelected ? 'false' : 'true';
+      if (tag.dataset.selected === 'true') {
+        tag.style.background = color;
+        tag.style.color = 'white';
+      } else {
+        tag.style.background = 'white';
+        tag.style.color = color;
+      }
+    };
+    
+    tag.onmouseenter = () => {
+      if (tag.dataset.selected === 'false') {
+        tag.style.background = color + '15';
+      }
+    };
+    tag.onmouseleave = () => {
+      if (tag.dataset.selected === 'false') {
+        tag.style.background = 'white';
+      }
+    };
+    
+    tagContainer.appendChild(tag);
   });
 
+  // Export button
+  const exportBtn = document.createElement('button');
+  exportBtn.type = 'button';
+  exportBtn.innerText = 'Export';
+  exportBtn.style.padding = '10px 14px';
+  exportBtn.style.borderRadius = '999px';
+  exportBtn.style.border = 'none';
+  exportBtn.style.cursor = 'pointer';
+  exportBtn.style.fontWeight = '700';
+  exportBtn.style.fontSize = '13px';
+  exportBtn.style.color = 'white';
+  exportBtn.style.background = '#1a73e8';
+  exportBtn.style.boxShadow = '0 1px 4px rgba(0,0,0,0.25)';
+  exportBtn.onmouseenter = () => (exportBtn.style.filter = 'brightness(0.96)');
+  exportBtn.onmouseleave = () => (exportBtn.style.filter = 'none');
+  exportBtn.onclick = () => {
+    const selectedTags = Array.from(tagContainer.querySelectorAll('[data-tag-id]'))
+      .filter(tag => tag.dataset.selected === 'true')
+      .map(tag => tag.dataset.tagId);
+    exportNow(selectedTags);
+  };
+
+  panel.appendChild(tagContainer);
+  panel.appendChild(exportBtn);
   document.body.appendChild(panel);
   return panel;
 }
@@ -304,7 +358,7 @@ function getChatContent() {
   return messages;
 }
 
-function formatMarkdown(messages) {
+function formatMarkdown(messages, tags = []) {
   if (messages.length === 0) return null;
 
   const convTitle = getConversationTitle() || document.title || 'Gemini Chat';
@@ -325,6 +379,12 @@ function formatMarkdown(messages) {
   md += `messageCount: ${meta.messageCount}\n`;
   md += `sourceUrl: "${String(meta.sourceUrl).replace(/"/g, '\\"')}"\n`;
   if (meta.conversationId) md += `conversationId: "${String(meta.conversationId).replace(/"/g, '\\"')}"\n`;
+  if (tags && tags.length > 0) {
+    md += `tags:\n`;
+    tags.forEach(tag => {
+      md += `  - ${String(tag).replace(/"/g, '\\"')}\n`;
+    });
+  }
   md += `---\n\n`;
   md += `# ${convTitle}\n\nDate: ${date}\n\n---\n\n`;
 
@@ -335,10 +395,10 @@ function formatMarkdown(messages) {
   return md;
 }
 
-function exportNow(bucketId = 'general') {
+function exportNow(tags = []) {
   const messages = getChatContent();
-  console.log(`Gemini Auto Exporter: Export clicked (bucket=${bucketId}). Messages:`, messages.length);
-  const markdown = formatMarkdown(messages);
+  console.log(`Gemini Auto Exporter: Export clicked (tags=${JSON.stringify(tags)}). Messages:`, messages.length);
+  const markdown = formatMarkdown(messages, tags);
   const convTitle = getConversationTitle() || document.title || 'gemini_chat';
 
   if (!markdown) {
@@ -346,7 +406,8 @@ function exportNow(bucketId = 'general') {
     return;
   }
   const contentHash = fnv1aHash(markdown);
-  setStatus('exporting', bucketId);
+  const tagLabel = tags.length > 0 ? tags.join(', ') : 'untagged';
+  setStatus('exporting', tagLabel);
   safeSendMessage(
     {
       action: 'export_chat',
@@ -354,11 +415,11 @@ function exportNow(bucketId = 'general') {
       title: convTitle,
       url: window.location.href,
       conversationId: getConversationIdFromUrl(window.location.href),
-      bucketId,
+      tags: tags,
       contentHash
     },
-    () => setStatus('saved', `exported ${bucketId} ${formatTime()}`),
-    () => setStatus('error', `export failed (${bucketId})`)
+    () => setStatus('saved', `exported (${tagLabel}) ${formatTime()}`),
+    () => setStatus('error', `export failed (${tagLabel})`)
   );
 }
 
@@ -366,7 +427,7 @@ function exportNow(bucketId = 'general') {
 window.addEventListener('pagehide', () => {
   console.log('Gemini Auto Exporter: Page hiding...');
   const messages = getChatContent();
-  const markdown = formatMarkdown(messages);
+  const markdown = formatMarkdown(messages, []);
 
   if (markdown) {
     setStatus('exporting', 'closing tab');
@@ -379,7 +440,7 @@ window.addEventListener('pagehide', () => {
         title: getConversationTitle() || document.title || 'gemini_chat',
         url: window.location.href,
         conversationId: getConversationIdFromUrl(window.location.href),
-        bucketId: 'general'
+        tags: []
       },
       () => {
         console.log('Gemini Auto Exporter: Send successful');

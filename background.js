@@ -69,9 +69,18 @@ function sanitizeFilename(title) {
 }
 
 function sanitizeBucket(bucketId) {
+  // No longer used - keeping for backward compatibility
   const b = String(bucketId || '').trim().toLowerCase();
   if (!b) return '';
   return b.replace(/[^a-z0-9\-_]/g, '_').substring(0, 32);
+}
+
+function sanitizeTags(tags) {
+  if (!Array.isArray(tags)) return [];
+  return tags
+    .map(tag => String(tag || '').trim().toLowerCase())
+    .filter(tag => tag.length > 0)
+    .map(tag => tag.replace(/[^a-z0-9\-_]/g, '_').substring(0, 32));
 }
 
 function extractConversationIdFromUrl(url) {
@@ -89,7 +98,7 @@ function extractConversationIdFromUrl(url) {
   }
 }
 
-function downloadMarkdown(markdown, title, folder = 'Gemini_Exports', url = '') {
+function downloadMarkdown(markdown, title, url = '') {
   const dataUrl = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(markdown);
   const conversationId = extractConversationIdFromUrl(url);
   const base = sanitizeFilename(title);
@@ -97,10 +106,11 @@ function downloadMarkdown(markdown, title, folder = 'Gemini_Exports', url = '') 
     ? `${base}_${sanitizeFilename(conversationId)}.md`
     : `${base}_${Date.now()}.md`;
 
+  // All files go to the same folder: Gemini_Exports/
   chrome.downloads.download(
     {
       url: dataUrl,
-      filename: `${folder}/${filename}`,
+      filename: `Gemini_Exports/${filename}`,
       conflictAction: 'overwrite',
       saveAs: false
     },
@@ -144,7 +154,7 @@ async function exportFromCache(tabId, reason = 'tab_close') {
   if (wasRecentlyExported(tabId)) return false;
 
   console.log(`Gemini Auto Exporter: Exporting cached chat for tab ${tabId} (reason=${reason})`);
-  downloadMarkdown(cached.markdown, cached.title, 'Gemini_Exports', cached.url);
+  downloadMarkdown(cached.markdown, cached.title, cached.url);
   await markExported(tabId);
   return true;
 }
@@ -183,12 +193,10 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
           return;
         }
 
-        const bucket = sanitizeBucket(message.bucketId);
-        const folder = bucket ? `Gemini_Exports/${bucket}` : 'Gemini_Exports';
+        // All files go to the same folder - tags are in the YAML frontmatter
         downloadMarkdown(
           message.payload,
           message.title,
-          folder,
           sender?.tab?.url || message.url || ''
         );
         if (tabId) {
