@@ -81,6 +81,9 @@ Reduce friction turning Gemini conversations into action by exporting chats to M
 - **Reload**: After installing or updating, make sure to refresh the Gemini tab.
 - If downloads don't start, check the extension errors in `chrome://extensions`.
 - **"Extension context invalidated"**: This usually happens when you reloaded/updated the extension while the Gemini tab stayed open. Refresh the Gemini tab to re-inject the content script.
+- **Annotation toolbar not appearing**: Make sure you're selecting text within a message element (user-query or model-response). The selection must be at least 3 characters long.
+- **Annotations not appearing in exports**: Annotations are stored per conversation ID. Make sure you're exporting the same conversation where you added annotations.
+- **Lost annotations**: Annotations are stored in `chrome.storage.local`. If you clear browser data, annotations will be lost. Consider exporting important conversations regularly.
 
 ## Interpretation of the attachment (roadmap)
 The sketch reads like an intent to evolve from “one export button” to **4+ export buttons** that:
@@ -154,6 +157,7 @@ sourceUrl: "https://gemini.google.com/...."
 conversationId: "abc123def"
 bucket: "general"
 contentHash: "1a2b3c4d"
+annotationCount: 3
 ---
 
 # AI Agent Ecosystem & Adaptive UI
@@ -162,5 +166,31 @@ Date: 12/28/2025, 13:28:27
 ---
 
 ```
+
+## Annotation Feature Example
+
+When you add annotations to a conversation, they appear in the exported Markdown like this:
+
+```markdown
+## User
+
+What is the **capital** of France?
+
+> **Annotation 1:** Important question
+
+## Gemini
+
+The capital of France is ==Paris==. It is a beautiful city.
+
+> **Annotation 1:** Highlighted for reference
+```
+
+Annotations support:
+- **Bold** formatting (`**text**`)
+- *Italic* formatting (`*text*`)
+- `Code` formatting (`` `text` ``)
+- Quote formatting (`> text`)
+- Highlight formatting (`==text==`)
+- Optional comments (shown as blockquotes)
 
 
