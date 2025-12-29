@@ -28,3 +28,12 @@ Note: the automation that created the repo used the agent's credentials; if you 
 
 ## Notes for future me
 - Keep this file concise and date-ed when adding new lessons.
+
+## Export metadata & filename behavior
+
+- The content script now extracts a visible conversation title when possible (selectors include `span.conversation-title.gds-title-m`, `.conversation-title`, and similar fallbacks).
+- That `title` is included in the Markdown frontmatter and used by the background script to derive a sanitized filename for downloads.
+- The background sanitization enforces a conservative character set, replaces unsafe characters with underscores, trims length, and appends the `conversationId` (if present) or a timestamp.
+- Files to inspect for this behavior: `content.js` (title extraction & frontmatter) and `background.js` (sanitizeFilename + download flow).
+
+Testing note: reload the extension, open a Gemini conversation titled in the UI, then click an export button; the downloaded `.md` should contain the visible title in its frontmatter and use a readable filename.

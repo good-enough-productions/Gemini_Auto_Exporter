@@ -98,4 +98,49 @@ If you want “export when Gemini finishes a response”, the best pattern is:
 - update cache immediately,
 - export only on idle/manual/close so you don’t spam downloads.
 
+## Export metadata and filename
+
+The exported Markdown now includes a small YAML frontmatter block and a top-level heading. This metadata is intended to make imports and automated indexing easier.
+
+- **Fields included**:
+   - `title`: extracted from the conversation UI (preferred) or falls back to `document.title` or the first user message.
+   - `dateLocal`: a human-friendly local date/time string for the export.
+   - `lastUpdated`: ISO timestamp (when the export was generated).
+   - `messageCount`: number of messages captured in the export.
+   - `sourceUrl`: the Gemini conversation URL.
+   - `conversationId`: stable ID inferred from the URL when available.
+   - `contentHash`: a lightweight hash of the exported content.
+   - `bucket`: the export bucket (e.g., `general`, `notes`, `ideas`, `code`, `tasks`).
+
+- **Filename strategy**:
+   - The content script attempts to extract a human-friendly conversation title from the page (selector examples: `span.conversation-title.gds-title-m`).
+   - That title is sent to the background script which sanitizes it and uses it as the base filename.
+   - If a `conversationId` is present it is appended to the filename; otherwise a timestamp is used as a fallback.
+   - Sanitization rules replace unsafe characters with underscores and limit the filename length to avoid filesystem issues.
+
+- **Where to look in the code**:
+   - Title extraction and frontmatter generation: `content.js`.
+   - Filename sanitization and the download call: `background.js`.
+
+Example frontmatter (truncated):
+
+```
+---
+title: "AI Agent Ecosystem & Adaptive UI"
+dateLocal: "12/28/2025, 13:28:27"
+lastUpdated: "2025-12-28T13:28:27.556Z"
+messageCount: 42
+sourceUrl: "https://gemini.google.com/...."
+conversationId: "abc123def"
+bucket: "general"
+contentHash: "1a2b3c4d"
+---
+
+# AI Agent Ecosystem & Adaptive UI
+
+Date: 12/28/2025, 13:28:27
+---
+
+```
+
 
