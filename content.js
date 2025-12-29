@@ -161,7 +161,7 @@ function ensureExportPanel() {
     
     tag.onmouseenter = () => {
       if (tag.dataset.selected === 'false') {
-        tag.style.background = color + '15';
+        tag.style.background = 'rgba(0, 0, 0, 0.05)';
       }
     };
     tag.onmouseleave = () => {
@@ -382,7 +382,9 @@ function formatMarkdown(messages, tags = []) {
   if (tags && tags.length > 0) {
     md += `tags:\n`;
     tags.forEach(tag => {
-      md += `  - ${String(tag).replace(/"/g, '\\"')}\n`;
+      // Escape backslashes first, then quotes for YAML safety
+      const escaped = String(tag).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      md += `  - ${escaped}\n`;
     });
   }
   md += `---\n\n`;

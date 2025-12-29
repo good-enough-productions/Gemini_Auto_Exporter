@@ -68,13 +68,6 @@ function sanitizeFilename(title) {
     .replace(/^_+|_+$/g, '') || 'gemini_chat';
 }
 
-function sanitizeBucket(bucketId) {
-  // No longer used - keeping for backward compatibility
-  const b = String(bucketId || '').trim().toLowerCase();
-  if (!b) return '';
-  return b.replace(/[^a-z0-9\-_]/g, '_').substring(0, 32);
-}
-
 function sanitizeTags(tags) {
   if (!Array.isArray(tags)) return [];
   return tags
