@@ -11,6 +11,18 @@ Reduce friction turning Gemini conversations into action by exporting chats to M
 ## References
 - User currently uses: [Simple Exporter for Gemini](https://chromewebstore.google.com/detail/simple-exporter-for-gemin/khgjgbneefjbbocjhakfamgmcjpkmoej)
 
+## Platform Compatibility
+
+| Platform | Support | Method |
+|----------|---------|--------|
+| 💻 **Desktop Chrome/Edge/Brave** | ✅ Full Support | Install extension directly |
+| 🤖 **Android** | ✅ Supported | Use [Kiwi Browser](./ANDROID_GUIDE.md) or [bookmarklet](./bookmarklet.js) |
+| 🍎 **iOS/iPadOS** | ⚠️ Limited | Bookmarklet only (Safari) |
+| 🦊 **Desktop Firefox** | ⚠️ Compatible | May need minor adjustments |
+| 📱 **Mobile Browsers** | ⚠️ Varies | See [Android Guide](./ANDROID_GUIDE.md) |
+
+**For Android users**: See the detailed [Android Compatibility Guide](./ANDROID_GUIDE.md) for step-by-step instructions.
+
 ## Technical Approach
 1. **Manifest V3** Chrome Extension.
 2. **Content Script**: Injected into `gemini.google.com`.
@@ -29,10 +41,22 @@ Reduce friction turning Gemini conversations into action by exporting chats to M
    - **Result**: even if `pagehide` export fails, the last cached version can still be downloaded.
 
 ## Installation
+
+### Desktop (Chrome, Edge, Brave, etc.)
 1. Open Chrome and navigate to `chrome://extensions`.
 2. Enable **Developer mode** in the top right corner.
 3. Click **Load unpacked**.
 4. Select this folder (`Gemini_Auto_Exporter`).
+
+### Android / Mobile
+📱 **For Android users**: See the [Android Compatibility Guide](./ANDROID_GUIDE.md) for detailed instructions on using this extension on your phone or tablet.
+
+**Quick options:**
+- **Kiwi Browser** (Recommended): Full extension support on Android
+- **Bookmarklet**: Works in most mobile browsers for manual exports
+- **Desktop Mode**: Use mobile browser in desktop mode with workarounds
+
+See [ANDROID_GUIDE.md](./ANDROID_GUIDE.md) for complete setup instructions.
 
 ## Usage
 - Open [Gemini](https://gemini.google.com).
