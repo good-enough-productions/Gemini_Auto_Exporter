@@ -2,7 +2,7 @@
 
 let autosaveIntervalId = null;
 let extensionInvalidated = false;
-let annotations = {}; // Store annotations: { conversationId: [{ messageIndex, snippet, comment, format }] }
+let annotations = []; // Store annotations: [{ id, messageIndex, snippet, comment, format, createdAt }]
 
 console.log('Gemini Auto Exporter: content script loaded', window.location.href);
 
