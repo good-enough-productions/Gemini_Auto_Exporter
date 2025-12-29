@@ -75,7 +75,7 @@ The Gemini Auto Exporter is a browser extension designed for desktop Chrome. How
 ### Installation Steps:
 
 1. **Install Firefox Nightly** (supports custom extension collections)
-   - Download from [Google Play Store](https://play.google.com/store/apps/details?id=org.mozilla.fenix)
+   - Download from [Google Play Store](https://play.google.com/store/apps/details?id=org.mozilla.fenix.nightly)
 
 2. **Create a Custom Add-on Collection** (requires desktop)
    - Visit https://addons.mozilla.org
@@ -108,18 +108,25 @@ For browsers that don't support extensions, you can use a bookmarklet - a piece 
 
 ### Installation:
 
-1. **Create a bookmark** in your mobile browser with this URL:
+For the easiest installation experience, visit the **[Bookmarklet Installer Page](./bookmarklet.html)** which provides:
+- Drag-and-drop installation for desktop
+- Copy-to-clipboard for mobile
+- Detailed instructions for all platforms
 
-```javascript
-javascript:(function(){var messages=[];document.querySelectorAll('user-query, model-response').forEach(el=>{var role=el.tagName.toLowerCase().includes('user')?'User':'Gemini';var content=el.innerText.trim();if(content)messages.push({role,content});});if(messages.length===0){alert('No messages found!');return;}var md='# Gemini Chat\n\n';messages.forEach(msg=>{md+='## '+msg.role+'\n\n'+msg.content+'\n\n';});var blob=new Blob([md],{type:'text/markdown'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='gemini_chat_'+Date.now()+'.md';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);})();
-```
+**Quick method:**
+1. Open the [bookmarklet.html](./bookmarklet.html) file in your browser
+2. Follow the on-screen instructions for your device
+3. The bookmarklet code is automatically configured for you
 
-2. **Name the bookmark** something like "Export Gemini Chat"
+**Technical details:**
+- Full bookmarklet source code is available in [bookmarklet.js](./bookmarklet.js)
+- Includes both minified and readable versions
+- Works with any browser (no extension support needed)
 
-3. **Usage:**
-   - Navigate to a Gemini conversation
-   - Tap the bookmark to export the current conversation
-   - The file will download to your device
+### Usage:
+- Navigate to a Gemini conversation
+- Tap the bookmark to export the current conversation
+- The file will download to your device
 
 ### Bookmarklet Limitations:
 - No auto-save functionality
