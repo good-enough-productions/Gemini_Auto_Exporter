@@ -382,9 +382,9 @@ function formatMarkdown(messages, tags = []) {
   if (tags && tags.length > 0) {
     md += `tags:\n`;
     tags.forEach(tag => {
-      // Escape backslashes first, then quotes for YAML safety
+      // Escape backslashes first, then quotes for YAML safety, and quote the value
       const escaped = String(tag).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-      md += `  - ${escaped}\n`;
+      md += `  - "${escaped}"\n`;
     });
   }
   md += `---\n\n`;

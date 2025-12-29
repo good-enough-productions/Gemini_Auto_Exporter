@@ -68,14 +68,6 @@ function sanitizeFilename(title) {
     .replace(/^_+|_+$/g, '') || 'gemini_chat';
 }
 
-function sanitizeTags(tags) {
-  if (!Array.isArray(tags)) return [];
-  return tags
-    .map(tag => String(tag || '').trim().toLowerCase())
-    .filter(tag => tag.length > 0)
-    .map(tag => tag.replace(/[^a-z0-9\-_]/g, '_').substring(0, 32));
-}
-
 function extractConversationIdFromUrl(url) {
   if (!url) return '';
   try {
