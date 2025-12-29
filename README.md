@@ -38,6 +38,18 @@ Reduce friction turning Gemini conversations into action by exporting chats to M
 - Open [Gemini](https://gemini.google.com).
 - Have a chat.
 
+### Annotations
+- **Highlight text** in any message to add annotations
+- When you select text, a toolbar appears with formatting options:
+  - **B** - Bold
+  - **I** - Italic
+  - **</>** - Code
+  - **"** - Quote
+  - **◆** - Highlight
+- You can also add an optional comment to your annotation
+- Click the **📝** button in the export panel to view and manage all annotations
+- Annotations are preserved per conversation and appear in exported Markdown files
+
 ### Export buttons (buckets)
 - A small panel appears in the bottom-right with:
    - **Export** (general)
@@ -45,6 +57,7 @@ Reduce friction turning Gemini conversations into action by exporting chats to M
    - **Ideas**
    - **Code**
    - **Tasks**
+   - **📝** (Manage Annotations)
 - Clicking a button downloads a Markdown export to `Downloads/Gemini_Exports/<bucket>/` (general exports go to `Downloads/Gemini_Exports/`).
 
 ### Autosave indicator
@@ -111,6 +124,13 @@ The exported Markdown now includes a small YAML frontmatter block and a top-leve
    - `conversationId`: stable ID inferred from the URL when available.
    - `contentHash`: a lightweight hash of the exported content.
    - `bucket`: the export bucket (e.g., `general`, `notes`, `ideas`, `code`, `tasks`).
+   - `annotationCount`: number of annotations added to the conversation (if any).
+
+- **Annotations in exports**:
+   - User-added annotations (highlights, formatting, and comments) are preserved in the exported Markdown.
+   - Text formatting is applied using Markdown syntax (bold, italic, code, quotes, highlights).
+   - Comments appear as blockquotes after the annotated message.
+   - Annotations are stored per conversation and persist across sessions.
 
 - **Filename strategy**:
    - The content script attempts to extract a human-friendly conversation title from the page (selector examples: `span.conversation-title.gds-title-m`).
