@@ -1,5 +1,20 @@
 # Android Compatibility Guide
 
+## Quick Start (TL;DR)
+
+**Want to use Gemini Auto Exporter on your Android phone right now?**
+
+1. **Install [Kiwi Browser](https://play.google.com/store/apps/details?id=com.kiwibrowser.browser)** from Play Store
+2. **Download this repository** to your phone (use GitHub mobile or download as ZIP)
+3. **Open Kiwi Browser** → Navigate to `chrome://extensions`
+4. **Enable Developer mode** (toggle in top-right)
+5. **Load the extension** → Select the folder with manifest.json
+6. **Visit [gemini.google.com](https://gemini.google.com)** and start chatting!
+
+Export buttons will appear in bottom-right. Files save to your Downloads folder.
+
+---
+
 ## Overview
 
 The Gemini Auto Exporter is a browser extension designed for desktop Chrome. However, you can use it on Android devices with some workarounds. This guide explains your options for auto-exporting Gemini conversations on Android.
@@ -19,13 +34,26 @@ The Gemini Auto Exporter is a browser extension designed for desktop Chrome. How
    - Enable "Desktop site" by default (optional but recommended)
 
 3. **Install the Extension**
+   
+   First, get the extension files on your Android device:
+   
+   **Method A: Download ZIP (Easiest)**
+   - Visit https://github.com/good-enough-productions/Gemini_Auto_Exporter
+   - Tap "Code" → "Download ZIP"
+   - Open the ZIP file in your file manager
+   - Extract to a folder (e.g., `Downloads/Gemini_Auto_Exporter`)
+   
+   **Method B: Use Git (Advanced)**
+   - Install a Git client like [Termux](https://f-droid.org/en/packages/com.termux/)
+   - Run: `git clone https://github.com/good-enough-productions/Gemini_Auto_Exporter.git`
+   
+   Then load the extension:
    - Open Kiwi Browser
    - Navigate to `chrome://extensions`
    - Enable "Developer mode" (toggle in top-right)
-   - Download or clone this repository to your device
    - Tap "Load unpacked" (or "+ (from .zip/.crx/.user.js)")
    - Navigate to the folder containing the extension files
-   - Select the folder and load it
+   - Select the folder with `manifest.json` and load it
 
 4. **Use Gemini**
    - Navigate to https://gemini.google.com
