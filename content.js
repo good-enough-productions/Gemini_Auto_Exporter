@@ -505,7 +505,7 @@ setTimeout(startUiAndObservers, 1500);
 let lastContent = '';
 autosaveIntervalId = setInterval(() => {
   const messages = getChatContent();
-  const markdown = formatMarkdown(messages);
+  const markdown = formatMarkdown(messages, []);
   if (markdown && markdown !== lastContent) {
     lastContent = markdown;
     setStatus('saving', 'updating cache');
