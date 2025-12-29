@@ -82,7 +82,7 @@
 
     <div class="bookmarklet-container">
         <h2>Drag this to your bookmarks bar:</h2>
-        <a href="javascript:(function(){var messages=[];var elements=Array.from(document.querySelectorAll('user-query, model-response'));if(elements.length===0){elements=Array.from(document.querySelectorAll('.user-query, .model-response'));}if(elements.length===0){alert('No messages found. Make sure you are on a Gemini conversation page.');return;}elements.forEach(function(el){var role='Unknown';var tagName=el.tagName.toLowerCase();if(tagName.includes('user')||el.classList.contains('user-query')){role='User';}else if(tagName.includes('model')||el.classList.contains('model-response')){role='Gemini';}var content=el.innerText.trim();if(content){messages.push({role:role,content:content});}});if(messages.length===0){alert('No messages found in conversation.');return;}var title='Gemini Chat';try{var titleEl=document.querySelector('span.conversation-title.gds-title-m, .conversation-title, h1');if(titleEl&&titleEl.innerText){title=titleEl.innerText.trim();}}catch(e){}var date=new Date().toLocaleString();var url=window.location.href;var md='---\n';md+='title: &quot;'+title.replace(/&quot;/g,'\\&quot;')+'&quot;\n';md+='date: &quot;'+date+'&quot;\n';md+='source: &quot;'+url+'&quot;\n';md+='exported_via: &quot;bookmarklet&quot;\n';md+='---\n\n';md+='# '+title+'\n\n';md+='Date: '+date+'\n\n---\n\n';messages.forEach(function(msg){md+='## '+msg.role+'\n\n'+msg.content+'\n\n';});var blob=new Blob([md],{type:'text/markdown'});var downloadUrl=URL.createObjectURL(blob);var a=document.createElement('a');a.href=downloadUrl;var filename=title.replace(/[^a-z0-9\-\s]/gi,'_').replace(/\s+/g,'_').substring(0,80).replace(/^_+|_+$/g,'')||'gemini_chat';a.download=filename+'_'+Date.now()+'.md';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(downloadUrl);alert('Exported '+messages.length+' messages to '+a.download);})();" class="bookmarklet-link">
+        <a href="#" id="bookmarkletLink" class="bookmarklet-link">
             📥 Export Gemini Chat
         </a>
     </div>
@@ -112,7 +112,7 @@
         <h3>⚠️ For Mobile Users:</h3>
         <p>Copy the entire code below and paste it as the bookmark URL:</p>
         <div class="code-box" id="bookmarkletCode">
-javascript:(function(){var messages=[];var elements=Array.from(document.querySelectorAll('user-query, model-response'));if(elements.length===0){elements=Array.from(document.querySelectorAll('.user-query, .model-response'));}if(elements.length===0){alert('No messages found. Make sure you are on a Gemini conversation page.');return;}elements.forEach(function(el){var role='Unknown';var tagName=el.tagName.toLowerCase();if(tagName.includes('user')||el.classList.contains('user-query')){role='User';}else if(tagName.includes('model')||el.classList.contains('model-response')){role='Gemini';}var content=el.innerText.trim();if(content){messages.push({role:role,content:content});}});if(messages.length===0){alert('No messages found in conversation.');return;}var title='Gemini Chat';try{var titleEl=document.querySelector('span.conversation-title.gds-title-m, .conversation-title, h1');if(titleEl&&titleEl.innerText){title=titleEl.innerText.trim();}}catch(e){}var date=new Date().toLocaleString();var url=window.location.href;var md='---\n';md+='title: "'+title.replace(/"/g,'\\"')+'"\n';md+='date: "'+date+'"\n';md+='source: "'+url+'"\n';md+='exported_via: "bookmarklet"\n';md+='---\n\n';md+='# '+title+'\n\n';md+='Date: '+date+'\n\n---\n\n';messages.forEach(function(msg){md+='## '+msg.role+'\n\n'+msg.content+'\n\n';});var blob=new Blob([md],{type:'text/markdown'});var downloadUrl=URL.createObjectURL(blob);var a=document.createElement('a');a.href=downloadUrl;var filename=title.replace(/[^a-z0-9\-\s]/gi,'_').replace(/\s+/g,'_').substring(0,80).replace(/^_+|_+$/g,'')||'gemini_chat';a.download=filename+'_'+Date.now()+'.md';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(downloadUrl);alert('Exported '+messages.length+' messages to '+a.download);})();
+            <!-- Code will be populated by JavaScript -->
         </div>
         <button onclick="copyBookmarklet()" style="background: #0f9d58; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px;">
             📋 Copy to Clipboard
@@ -159,9 +159,24 @@ javascript:(function(){var messages=[];var elements=Array.from(document.querySel
     <p><small>Part of the <a href="https://github.com/good-enough-productions/Gemini_Auto_Exporter">Gemini Auto Exporter</a> project</small></p>
 
     <script>
+        // Single source of truth for bookmarklet code
+        const BOOKMARKLET_CODE = "javascript:(function(){var messages=[];var elements=Array.from(document.querySelectorAll('user-query, model-response'));if(elements.length===0){elements=Array.from(document.querySelectorAll('.user-query, .model-response'));}if(elements.length===0){alert('No messages found. Make sure you are on a Gemini conversation page.');return;}elements.forEach(function(el){var role='Unknown';var tagName=el.tagName.toLowerCase();if(tagName.includes('user')||el.classList.contains('user-query')){role='User';}else if(tagName.includes('model')||el.classList.contains('model-response')){role='Gemini';}var content=el.innerText.trim();if(content){messages.push({role:role,content:content});}});if(messages.length===0){alert('No messages found in conversation.');return;}var title='Gemini Chat';try{var titleEl=document.querySelector('span.conversation-title.gds-title-m, .conversation-title, h1');if(titleEl&&titleEl.innerText){title=titleEl.innerText.trim();}}catch(e){}var date=new Date().toLocaleString();var url=window.location.href;var md='---\\n';md+='title: \"'+title.replace(/\"/g,'\\\\\"')+'\"\\n';md+='date: \"'+date+'\"\\n';md+='source: \"'+url+'\"\\n';md+='exported_via: \"bookmarklet\"\\n';md+='---\\n\\n';md+='# '+title+'\\n\\n';md+='Date: '+date+'\\n\\n---\\n\\n';messages.forEach(function(msg){md+='## '+msg.role+'\\n\\n'+msg.content+'\\n\\n';});var blob=new Blob([md],{type:'text/markdown'});var downloadUrl=URL.createObjectURL(blob);var a=document.createElement('a');a.href=downloadUrl;var filename=title.replace(/[^a-z0-9\\-\\s]/gi,'_').replace(/\\s+/g,'_').substring(0,80).replace(/^_+|_+$/g,'')||'gemini_chat';a.download=filename+'_'+Date.now()+'.md';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(downloadUrl);alert('Exported '+messages.length+' messages to '+a.download);})();";
+        
+        // Populate the code display on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeBox = document.getElementById('bookmarkletCode');
+            if (codeBox) {
+                codeBox.textContent = BOOKMARKLET_CODE;
+            }
+            
+            const bookmarkletLink = document.getElementById('bookmarkletLink');
+            if (bookmarkletLink) {
+                bookmarkletLink.href = BOOKMARKLET_CODE;
+            }
+        });
+        
         function copyBookmarklet() {
-            const code = document.getElementById('bookmarkletCode').innerText;
-            navigator.clipboard.writeText(code).then(() => {
+            navigator.clipboard.writeText(BOOKMARKLET_CODE).then(() => {
                 alert('✅ Bookmarklet code copied to clipboard!\n\nNow:\n1. Create a new bookmark\n2. Paste this as the URL\n3. Save it');
             }).catch(err => {
                 alert('❌ Could not copy to clipboard. Please select and copy the text manually.');
